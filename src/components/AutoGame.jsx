@@ -12,166 +12,134 @@ const GamePage = ({ difficulty }) => {
     selectedDifficulty,
     currentFloor,
     setCurrentFloor,
+    handleBoxClick,
+    autoDifficulty,
+    setAutoDifficulty,
+    rounds,
+    setRounds,
+    isRevealed,
+    setIsRevealed,
+    boxes,
+    setBoxes,
+    generateRandomBoxes,
   } = useGame();
-  const [boxes, setBoxes] = useState([]);
-  const [isRevealed, setIsRevealed] = useState(false);
-  const [autoplayInterval, setAutoplayInterval] = useState(null); // Store the autoplay interval
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Start autoplay when the component mounts
-    startAutoplay();
-    
-    // Cleanup function to stop autoplay when the component unmounts
-    return () => {
-      stopAutoplay();
-    };
-  }, []);
-
-  // Function to start autoplay
-  const startAutoplay = () => {
-    const interval = setInterval(() => {
-      // Trigger box click events automatically
-      const randomIndex = Math.floor(Math.random() * boxes.length);
-      handleBoxClick(randomIndex);
-    }, 1000); // Interval time in milliseconds (adjust as needed)
-
-    setAutoplayInterval(interval);
-  };
-
-  // Function to stop autoplay
-  const stopAutoplay = () => {
-    clearInterval(autoplayInterval);
-  };
+  // useEffect(() => {
+  //   // Generate random boxes when component mounts or activeFloor changes
+  //   if (activeFloor !== null) {
+  //     // const randomBoxes = generateRandomBoxes(selectedDifficulty);
+  //     setBoxes(randomBoxes);
+  //   }
+  // }, [activeFloor, selectedDifficulty]);
 
   const generateBoxes = () => {
+    const numFloors = 8;
     const boxes = [];
-    for (let i = 1; i < 100; i++) {
+    for (let i = 1; i <= numFloors; i++) {
       const boxClass =
         activeFloor === i ? "btn-danger" : "btn-secondary disabled";
-      boxes.push(
-        <button
-          key={i}
-          className={`btn ${boxClass} me-1`}
-          onClick={() => handleFloorSelection(i)}
-        >
-          Floor {i}
-        </button>
-      );
     }
     return boxes;
   };
 
-  
   console.log(boxes);
-  const generateRandomBoxes = (difficulty) => {
-    let numBoxes, numGems, numBombs;
 
-    switch (difficulty) {
-      case "normal":
-        numBoxes = 4;
-        numGems = 3;
-        numBombs = 1;
-        break;
-      case "medium":
-        numBoxes = 3;
-        numGems = 2;
-        numBombs = 1;
-        break;
-      case "hard":
-        numBoxes = 3;
-        numGems = 1;
-        numBombs = 2;
-        break;
-      case "impossible":
-        numBoxes = 4;
-        numGems = 1;
-        numBombs = 3;
-        break;
-      default:
-        break;
-    }
+  // const handleBoxClick = (index) => {
 
-    const boxes = Array(numBoxes).fill("empty");
+  //   // Check if the game is already revealed
+  //   if (isRevealed) {
+  //     return; // Do nothing if the game is already revealed
+  //   }
+  //   if (currentFloor === 8){
+  //     alert("Congratulations! You won.");
+  //     setCurrentFloor(1);
+  //     setActiveFloor(1);
+  //     navigate("/");
 
-    // Place gems randomly
-    for (let i = 0; i < numGems; i++) {
-      let randomIndex;
-      do {
-        randomIndex = Math.floor(Math.random() * numBoxes);
-      } while (boxes[randomIndex] !== "empty");
-      boxes[randomIndex] = "gem";
-    }
+  //   }
 
-    // Place bombs randomly
-    for (let i = 0; i < numBombs; i++) {
-      let randomIndex;
-      do {
-        randomIndex = Math.floor(Math.random() * numBoxes);
-      } while (boxes[randomIndex] !== "empty");
-      boxes[randomIndex] = "bomb";
-    }
+  //   const updatedBoxes = [...boxes];
 
-    return boxes;
+  //   setIsRevealed(true);
+
+  //   // Check if the clicked box is a gem or a bomb
+  //   if (updatedBoxes[index] === "gem") {
+
+  //     alert("Congratulations! You won.");
+  //     setActiveFloor(activeFloor + 1);
+  //     setCurrentFloor(currentFloor + 1);
+
+  //   } else if (updatedBoxes[index] === "bomb") {
+  //     alert("Game Over!");
+  //     setActiveFloor(1);
+
+  //     // Redirect to another page or handle game over logic
+  //   }
+
+  //   // After checking the result, reveal all boxes
+  //   setTimeout(() => {
+  //     setIsRevealed(false);
+  //   const updatedBoxes = [...generateRandomBoxes(selectedDifficulty)];
+  //     setBoxes(updatedBoxes);
+  //   }, 1000);
+  // };
+
+  useEffect(
+    (floorNumber) => {
+      generateBoxes();
+      setActiveFloor(floorNumber);
+      const randomBoxes = generateRandomBoxes(selectedDifficulty); // Call generateRandomBoxes only when floor is selected
+      setBoxes(randomBoxes);
+    },
+    [currentFloor]
+  ); // Call generateBoxes whenever activeFloor changes
+
+  const handleFloorSelection = (floorNumber) => {
+    setActiveFloor(floorNumber);
+    const randomBoxes = generateRandomBoxes(selectedDifficulty); // Call generateRandomBoxes only when floor is selected
+    setBoxes(randomBoxes);
   };
-
-
-  const handleBoxClick = (index) => {
-    // Check if the game is already revealed
-    if (isRevealed) {
-      return; // Do nothing if the game is already revealed
-    }
-  
-
-    const updatedBoxes = [...boxes];
-
-    setIsRevealed(true);
-
-    // Check if the clicked box is a gem or a bomb
-    if (updatedBoxes[index] === "gem") {
-      alert("Congratulations! You won.");
-
-      setCurrentFloor(currentFloor + 1);
-    } else if (updatedBoxes[index] === "bomb") {
-      alert("Game Over!");
-
-      // Redirect to another page or handle game over logic
-    }
-
-    // After checking the result, reveal all boxes
-    setTimeout(() => {
-      setIsRevealed(false);
-      const updatedBoxes = [...generateRandomBoxes(selectedDifficulty)];
-      setBoxes(updatedBoxes);
-    }, 1000);
-  };
-
-
-
   return (
     <div className="container-fluid h-100">
       <div className="row h-100 justify-content-center align-items-center">
         <div className="col-md-6">
           <div className="game-page">
-            <h1>User Balance : {balance}</h1>
-            <h1>Current Floor : {currentFloor}</h1>
+            <div className="d-flex flex-column align-items-end p-3">
+              <div className="">
+                <h6>User Balance: {balance}</h6>
+              </div>
+              <div>
+                <h6>Current Floor: {currentFloor}</h6>
+              </div>
+            </div>
 
             <h1>Game Page</h1>
+            <p>Game Rules:
+              The goal of the game is to reach the top of the tower by selecting the
+              correct box on each floor. If you select a box with a bomb, the game is
+              over.
+              Each floor has one box with a gem, one box with a bomb, and the rest are
+              empty. You can only select one box per floor.
+            </p>
             <div className="tower align-center justify-center flex-row">
               {generateBoxes()}
             </div>
             {/* Render the generated boxes */}
-            <div className="box-container">
+            <div className="box-container d-flex p-5">
               {boxes.map((box, index) => (
-                <div key={index} onClick={() => handleBoxClick(index)}>
+                <div
+                  key={index}
+                  onClick={() => handleBoxClick(index)}
+                  className="me-5 mb-3 d-flex justify-content-center align-items-center"
+                >
                   {/* Render the box content based on its type */}
                   {!isRevealed ? (
-                    <FaBox />
+                    <FaBox size={40} />
                   ) : box === "gem" ? (
-                    <FaGem />
+                    <FaGem size={40} />
                   ) : (
-                    <FaBomb />
+                    <FaBomb size={40} />
                   )}
                 </div>
               ))}
@@ -179,7 +147,6 @@ const GamePage = ({ difficulty }) => {
             <Link to="/another-page" className="mb-5">
               Go to Another Page
             </Link>
-            <button onClick={stopAutoplay}>Stop Autoplay</button>
           </div>
         </div>
       </div>
