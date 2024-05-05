@@ -1,16 +1,24 @@
-import { useState } from 'react'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import WelcomeScreen from './components/WelcomeScreen';
+import GamePage from './components/GamePage';
+import AutoGame from './components/AutoGame';
+import { GameProvider } from './components/GameProvider';
 
-
-import './App.css'
-
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
   return (
-   <>
-   <h1>Hello World React project</h1>
-   </>
-  )
-}
+    <Router>
+      <GameProvider>
+        <div className="app">
+          <Routes>
+            <Route path="/" element={<WelcomeScreen />} />
+            <Route path="/game" element={<GamePage />} />
+            <Route path="/autoplay" element={<AutoGame />} />
+          </Routes>
+        </div>
+      </GameProvider>
+    </Router>
+  );
+};
 
-export default App
+export default App;
