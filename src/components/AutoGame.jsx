@@ -15,13 +15,14 @@ const GamePage = ({ difficulty }) => {
     handleBoxClick,
     autoDifficulty,
     setAutoDifficulty,
-    rounds,
-    setRounds,
+    roundsToPlay,
+    setRoundsToPlay,
     isRevealed,
     setIsRevealed,
     boxes,
     setBoxes,
     generateRandomBoxes,
+
   } = useGame();
 
   const navigate = useNavigate();
@@ -111,6 +112,9 @@ const GamePage = ({ difficulty }) => {
               </div>
               <div>
                 <h6>Current Floor: {currentFloor}</h6>
+              </div>
+              <div>
+                <h6>No Of Rounnds: {roundsToPlay}</h6>
               </div>
             </div>
 

@@ -10,8 +10,10 @@ const WelcomeScreen = () => {
     setCurrentFloor,
     setActiveFloor,
     autoPlay,
+    roundsToPlay,
+    setRoundsToPlay,
   } = useGame();
-  const [roundsToPlay, setRoundsToPlay] = useState("");
+
   const [showDifficulty, setShowDifficulty] = useState(false);
 
   const handleAutoplay = () => {

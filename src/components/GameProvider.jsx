@@ -2,23 +2,21 @@ import React, { createContext, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-
-// Create a context
+// Creating a context to pass the data to mangae the game state efficiently . we can use redux or zustand to manage if there are too many state in the project but for this small project i will use context api to manage the state of the game
 const GameContext = createContext();
 
-// Create a Provider component to wrap your components
+// Creating a Provider component to wrap your components
 export const GameProvider = ({ children }) => {
   const [selectedDifficulty, setSelectedDifficulty] = useState("normal");
   const [balance, setBalance] = useState(10);
   const [activeFloor, setActiveFloor] = useState(1);
   const [currentFloor, setCurrentFloor] = useState(1);
-  const [rounds, setRounds] = useState(0);
+  const [roundsToPlay, setRoundsToPlay] = useState("");
   const [autoDifficulty, setAutoDifficulty] = useState("");
   const [isRevealed, setIsRevealed] = useState(false);
   const [boxes, setBoxes] = useState([]);
 
   const navigate = useNavigate();
-
 
   const generateRandomBoxes = (difficulty) => {
     let numBoxes, numGems, numBombs;
@@ -47,9 +45,9 @@ export const GameProvider = ({ children }) => {
       default:
         break;
     }
-  
+
     const boxes = Array(numBoxes).fill("empty");
-  
+
     // Place gems randomly
     for (let i = 0; i < numGems; i++) {
       let randomIndex;
@@ -58,7 +56,7 @@ export const GameProvider = ({ children }) => {
       } while (boxes[randomIndex] !== "empty");
       boxes[randomIndex] = "gem";
     }
-  
+
     // Place bombs randomly
     for (let i = 0; i < numBombs; i++) {
       let randomIndex;
@@ -67,27 +65,26 @@ export const GameProvider = ({ children }) => {
       } while (boxes[randomIndex] !== "empty");
       boxes[randomIndex] = "bomb";
     }
-  
+
     return boxes;
   };
 
   const startGame = (selectedDifficulty) => {
     // Logic for starting the game
-    // You can define your game logic here
-    console.log(`Starting game with difficulty: ${selectedDifficulty}`);
+    // it will deduct the coins based on the difficulty level and to make it not reset everytime we either need to store in local storage cache or use api to store permanently . which can be done but thas what i wasnt assigned to do so i will just keep it in state and it will reset everytime we refresh the page 
 
     switch (selectedDifficulty) {
       case "normal":
-        setBalance(balance - 1); // Deduct 1 point for easy difficulty
+        setBalance(balance - 1); 
         break;
       case "medium":
-        setBalance(balance - 2); // Deduct 2 points for medium difficulty
+        setBalance(balance - 2); 
         break;
       case "hard":
-        setBalance(balance - 3); // Deduct 3 points for hard difficulty
+        setBalance(balance - 3); 
         break;
       case "impossible":
-        setBalance(balance - 4); // Deduct 4 points for impossible difficulty
+        setBalance(balance - 4); 
         break;
       default:
         break;
@@ -100,9 +97,8 @@ export const GameProvider = ({ children }) => {
       return;
     }
     startGame(selectedDifficulty);
-    navigate("/game"); // Redirect to the game page
+    navigate("/game"); 
   };
-
 
   const autoPlay = () => {
     if (selectedDifficulty === "") {
@@ -110,102 +106,96 @@ export const GameProvider = ({ children }) => {
       return;
     }
     startGame(selectedDifficulty);
-    navigate("/autoplay"); // Redirect to the game page
+    navigate("/autoplay"); 
   };
 
   const autoPlayLogic = (index) => {
-    // Check if the game is already revealed
+    // Checking if the game is already revealed
     if (isRevealed) {
-      return; // Do nothing if the game is already revealed
+      return; 
     }
-  
-    const updatedBoxes = [...boxes]; 
-  
+
+    const updatedBoxes = [...boxes];
+
     setIsRevealed(true);
-  
-    // Check if the clicked box is a gem or a bomb
+
+    // Checking if the clicked box is a gem or a bomb and logic accordingly 
     if (updatedBoxes[index] === "gem") {
-      alert("Congratulations! You won.");
-      setActiveFloor(activeFloor + 1);
-      setCurrentFloor(currentFloor + 1);
+      toast.success(`Congrats on Moving to Level ${currentFloor + 1}`, {
+        autoClose: 2000,
+        onClose: () => {
+          setCurrentFloor(currentFloor + 1);
+        },
+      });
     } else if (updatedBoxes[index] === "bomb") {
-      alert("Game Over!");
-      setActiveFloor(1);
-      // Redirect to another page or handle game over logic
+      toast.error(`Game Over!`, {
+        autoClose: 2000,
+        onClose: () => {
+          setActiveFloor(1);
+          setCurrentFloor(1);
+        },
+      });
+    
     }
-  
-    // After checking the result, reveal all boxes
+
+    // After checking the result, revealing all boxes
     setTimeout(() => {
       setIsRevealed(false);
-      const updatedBoxes = [...generateRandomBoxes(selectedDifficulty)]; 
+      const updatedBoxes = [...generateRandomBoxes(selectedDifficulty)];
       setBoxes(updatedBoxes);
     }, 2000);
   };
 
-  
   const handleBoxClick = (index) => {
-    
     // Check if the game is already revealed
     if (isRevealed) {
       return; // Do nothing if the game is already revealed
     }
-    if (currentFloor === 8){
+    if (currentFloor === 8 || currentFloor == roundsToPlay) {
       toast.success(`Congrats ! You completed The Quest`, {
         autoClose: 3000, // Close the toast after 1 second
         onClose: () => {
           setCurrentFloor(1);
+
           setActiveFloor(1);
           navigate("/");
-        }
+        },
       });
-      
     }
-  
-    const updatedBoxes = [...boxes]; 
-  
+
+    const updatedBoxes = [...boxes];
+
     setIsRevealed(true);
-  
+
     // Check if the clicked box is a gem or a bomb
     if (updatedBoxes[index] === "gem") {
-      
-      
-      toast.success(`Congrats on Moving to Level ${activeFloor + 1}`, {
-        autoClose: 2000,
-      onClose: () => {
-        setActiveFloor(activeFloor + 1);
-        setCurrentFloor(currentFloor + 1);
-      }
-      });
-      
-     
-
-      
-      
+      toast.success(
+        `Congrats on Moving to Level ${activeFloor + 1 || currentFloor + 1}`,
+        {
+          autoClose: 2000,
+          onClose: () => {
+            setActiveFloor(activeFloor + 1);
+            setCurrentFloor(currentFloor + 1);
+          },
+        }
+      );
     } else if (updatedBoxes[index] === "bomb") {
       toast.error(`Game Over!`, {
         autoClose: 2000,
-      onClose: () => {
-        setActiveFloor(1);
-      }
-      })
-      
-
-      
+        onClose: () => {
+          setActiveFloor(1);
+          setCurrentFloor(1);
+        },
+      });
     }
-  
+
     // After checking the result, reveal all boxes
     setTimeout(() => {
       setIsRevealed(false);
-      const updatedBoxes = [...generateRandomBoxes(selectedDifficulty)]; 
+      const updatedBoxes = [...generateRandomBoxes(selectedDifficulty)];
       setBoxes(updatedBoxes);
     }, 2000);
   };
-  
-  
-
-
-
-  
 
   return (
     <GameContext.Provider
@@ -222,15 +212,16 @@ export const GameProvider = ({ children }) => {
         autoPlay,
         autoPlayLogic,
         handleBoxClick,
-        setRounds,
-        rounds,
+
         autoDifficulty,
         setAutoDifficulty,
         isRevealed,
         setIsRevealed,
         boxes,
         setBoxes,
-        generateRandomBoxes
+        generateRandomBoxes,
+        roundsToPlay,
+        setRoundsToPlay,
       }}
     >
       {children}
